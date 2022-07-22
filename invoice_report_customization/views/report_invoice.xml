@@ -11,9 +11,9 @@
             -->
             <xpath expr="//tbody//tr" position="after">
                 <tr>
-<!--                    <td/>-->
+                    <!--                    <td/>-->
                     <td name="account_invoice_line_name" colspan="6">
-<!--                        <span t-field="line.name" t-options="{'widget': 'text'}"/>-->
+                        <!--                        <span t-field="line.name" t-options="{'widget': 'text'}"/>-->
                         <p t-if="line.sale_line_ids" class="mb-0">
                             <strong>Our/Ref:</strong>
                             <t t-esc="line.sale_line_ids.mapped('order_id').name"/>
@@ -22,10 +22,16 @@
                             <t t-esc="line.move_id.ref"/>
                         </p>
                         <p t-if="line.sale_line_ids" class="mb-0">
-                            <t t-set="delivery_id"
+                            <t t-set="delivery_ids"
                                t-value="line.sale_line_ids.mapped('order_id').picking_ids.filtered(lambda p: p.picking_type_code == 'outgoing' and p.state != 'cancel')"/>
-                            <strong t-if="delivery_id">Delivery:</strong>
-                            <t i-if="delivery_id" t-esc="delivery_id.name"/>
+                            <t t-foreach="delivery_ids" t-as="delivery_id">
+                                <t t-set="d_line"
+                                   t-value="delivery_id.move_ids_without_package.filtered(lambda p: p.sale_line_id.id in  line.sale_line_ids.ids)"/>
+                                <t t-if="d_line">
+                                    <strong t-if="d_line">Delivery:</strong>
+                                    <t i-if="d_line" t-esc="d_line.picking_id.name"/>
+                                </t>
+                            </t>
                         </p>
                     </td>
                 </tr>
