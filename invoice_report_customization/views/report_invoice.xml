@@ -2,18 +2,9 @@
 <odoo>
     <data>
         <template id="report_invoice_document_inherit" inherit_id="account.report_invoice_document">
-            <!--
-                        <xpath expr="//th[@name='th_description']" position="replace">
-                            <th name="th_description" class="text-left" style="width:386px !important;">
-                                <span>Description</span>
-                            </th>
-                        </xpath>
-            -->
             <xpath expr="//tbody//tr" position="after">
                 <tr>
-                    <!--                    <td/>-->
                     <td name="account_invoice_line_name" colspan="6">
-                        <!--                        <span t-field="line.name" t-options="{'widget': 'text'}"/>-->
                         <p t-if="line.sale_line_ids" class="mb-0">
                             <strong>Our/Ref:</strong>
                             <t t-esc="line.sale_line_ids.mapped('order_id').name"/>
@@ -23,13 +14,25 @@
                         </p>
                         <p t-if="line.sale_line_ids" class="mb-0">
                             <t t-set="delivery_ids"
-                               t-value="line.sale_line_ids.mapped('order_id').picking_ids.filtered(lambda p: p.picking_type_code == 'outgoing' and p.state != 'cancel')"/>
-                            <t t-foreach="delivery_ids" t-as="delivery_id">
+                               t-value="line.sale_line_ids.mapped('order_id').picking_ids.filtered(lambda p: p.picking_type_code == 'internal' and p.state != 'cancel')"/>
+                            <t t-foreach="delivery_ids" t-as="delivery_id" t-if="delivery_ids">
                                 <t t-set="d_line"
-                                   t-value="delivery_id.move_ids_without_package.filtered(lambda p: p.sale_line_id.id in  line.sale_line_ids.ids)"/>
+                                   t-value="delivery_id.move_ids_without_package.filtered(lambda p: p.product_id.id ==  line.product_id.id)"/>
                                 <t t-if="d_line">
                                     <strong t-if="d_line">Delivery:</strong>
                                     <t i-if="d_line" t-esc="d_line.picking_id.name"/>
+                                </t>
+                            </t>
+                            <t t-if="not delivery_ids">
+                                <t t-set="out_delivery_ids"
+                                   t-value="line.sale_line_ids.mapped('order_id').picking_ids.filtered(lambda p: p.picking_type_code == 'outgoing' and p.state != 'cancel')"/>
+                                <t t-foreach="out_delivery_ids" t-as="out_delivery_id">
+                                    <t t-set="d_line"
+                                       t-value="out_delivery_id.move_ids_without_package.filtered(lambda p: p.sale_line_id.id in  line.sale_line_ids.ids)"/>
+                                    <t t-if="d_line">
+                                        <strong t-if="d_line">Delivery:</strong>
+                                        <t i-if="d_line" t-esc="d_line.picking_id.name"/>
+                                    </t>
                                 </t>
                             </t>
                         </p>
